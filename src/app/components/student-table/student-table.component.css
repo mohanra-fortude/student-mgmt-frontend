@@ -1,0 +1,23 @@
+.delete {
+  background-color: #ff6358;
+  color: white;
+  margin-left: 1rem;
+}
+.update {
+  background-color: rgb(179, 177, 177);
+  color: white;
+}
+.b {
+  display: flex;
+  margin-bottom: 2rem;
+  margin-top: 1rem;
+}
+.header {
+  display: flex;
+  float: end;
+  margin-left: 50rem;
+  margin-bottom: 0.5rem;
+}
+.add {
+  margin-right: 1rem;
+}
