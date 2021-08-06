@@ -20,6 +20,8 @@ import { UploadsModule, UploadModule } from '@progress/kendo-angular-upload';
 import {  HTTP_INTERCEPTORS } from '@angular/common/http';
 import { UploadInterceptor } from './app.component';
 import { DateInputsModule } from '@progress/kendo-angular-dateinputs';
+import { NotificationModule } from '@progress/kendo-angular-notification';
+
 
 @NgModule({
   declarations: [AppComponent, StudentTableComponent],
@@ -42,6 +44,7 @@ import { DateInputsModule } from '@progress/kendo-angular-dateinputs';
     UploadsModule,
     UploadModule,
     DateInputsModule,
+    NotificationModule,
   ],
   providers: [
     {

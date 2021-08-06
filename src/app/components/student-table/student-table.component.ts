@@ -15,7 +15,7 @@ const GET_STUDENTS = gql`
   }
 `;
 const DELETE = gql`
-  mutation ($studentId: String!) {
+  mutation ($studentId: Int!) {
     removeStudent(id: $studentId) {
       __typename
     }
@@ -23,19 +23,21 @@ const DELETE = gql`
 `;
 interface student {}
 const CREATE_STUDENT = gql`
-  mutation ($name: String!, $email: String!, $dateofbirth: DateTime!) {
+  mutation ($name: String!, $email: String!, $dob: String!) {
     createStudent(
-      createStudentInput: {
-        name: $name
-        email: $email
-        dateofbirth: $dateofbirth
-      }
+      createStudentInput: { name: $name, email: $email, dob: $dob }
     ) {
-      id
-      name
-      email
-      dateofbirth
-      age
+      __typename
+    }
+  }
+`;
+
+const UPDATE_STUDENT = gql`
+  mutation ($id: Int!, $name: String!, $email: String!, $dob: String!) {
+    updateStudent(
+      updateStudentInput: { id: $id, name: $name, email: $email, dob: $dob }
+    ) {
+      __typename
     }
   }
 `;
@@ -45,51 +47,34 @@ const CREATE_STUDENT = gql`
   styleUrls: ['./student-table.component.css'],
 })
 export class StudentTableComponent implements OnInit {
-  public gridView!: GridDataResult;
   public pageSize = 10;
   public skip = 0;
   public opened = false;
   items: Student[] = [];
   form!: FormGroup;
-  userData = {
-    name: '',
-    email: '',
-    dateofbirth: '',
-  };
+
   public uploadRemoveUrl = 'removeUrl';
   public uploadSaveUrl = 'saveUrl';
-  constructor(private apollo: Apollo) {
-    this.loadItems();
-    this.form = new FormGroup({
-      name: new FormControl(this.userData.name, [Validators.required]),
-      email: new FormControl(this.userData.email, [Validators.required]),
-      dateofbirth: new FormControl(this.userData.dateofbirth, [
-        Validators.required,
-      ]),
-    });
-  }
+
+  public formGroup!: FormGroup;
+
+  constructor(private apollo: Apollo) {}
 
   ngOnInit(): void {
+    this.fetchData();
+  }
+
+  fetchData() {
+    console.log('running fetch');
     this.apollo
       .watchQuery<any>({
         query: GET_STUDENTS,
       })
       .valueChanges.subscribe(({ data, loading }) => {
         this.items = data.student;
-        console.log(this.items);
       });
   }
-  public pageChange(event: PageChangeEvent): void {
-    this.skip = event.skip;
-    this.loadItems();
-  }
 
-  private loadItems(): void {
-    this.gridView = {
-      data: this.items.slice(this.skip, this.skip + this.pageSize),
-      total: this.items.length,
-    };
-  }
   public close() {
     this.opened = false;
   }
@@ -97,34 +82,123 @@ export class StudentTableComponent implements OnInit {
   public open() {
     this.opened = true;
   }
-  removeHandler(id: any) {
+
+  public editHandler({
+    sender,
+    rowIndex,
+    dataItem,
+  }: {
+    sender: any;
+    rowIndex: any;
+    dataItem: any;
+  }) {
+    // define all editable fields validators and default values
+
+    this.formGroup = new FormGroup({
+      name: new FormControl(dataItem.name, Validators.required),
+      email: new FormControl(dataItem.email, Validators.required),
+      dob: new FormControl(dataItem.dob, Validators.required),
+      id: new FormControl(dataItem.id, Validators.required),
+    });
+
+    // put the row in edit mode, with the `FormGroup` build above
+    sender.editRow(rowIndex, this.formGroup);
+  }
+
+  public async saveHandler({
+    sender,
+    rowIndex,
+    formGroup,
+    isNew,
+  }: {
+    sender: any;
+    rowIndex: any;
+    formGroup: any;
+    isNew: any;
+  }) {
+    console.log(isNew);
+
+    if (isNew) {
+      console.log('inside create');
+      await this.apollo
+        .mutate({
+          mutation: CREATE_STUDENT,
+          variables: {
+            name: this.formGroup.value.name,
+            email: this.formGroup.value.email,
+            dob: this.formGroup.value.dob,
+          },
+        })
+        .subscribe((value) => {
+          this.fetchData();
+        });
+
+      await this.fetchData();
+
+      sender.closeRow(rowIndex);
+    } else {
+      await this.apollo
+        .mutate({
+          mutation: UPDATE_STUDENT,
+          variables: {
+            id: this.formGroup.value.id,
+            name: this.formGroup.value.name,
+            email: this.formGroup.value.email,
+            dob: this.formGroup.value.dob,
+          },
+        })
+        .subscribe((value) => {
+          console.log('inside subscribe', value);
+          this.fetchData();
+          console.log('after subscribe');
+        });
+
+      await this.fetchData();
+
+      sender.closeRow(rowIndex);
+    }
+  }
+
+  public cancelHandler({ sender, rowIndex }: { sender: any; rowIndex: any }) {
+    // close the editor for the given row
+    sender.closeRow(rowIndex);
+  }
+
+  public addHandler({ sender }: { sender: any }) {
+    // define all editable fields validators and default values
+    this.formGroup = new FormGroup({
+      name: new FormControl('', Validators.required),
+      email: new FormControl('', Validators.required),
+      dob: new FormControl('', Validators.required),
+      id: new FormControl(0, Validators.required),
+    });
+
+    // show the new row editor, with the `FormGroup` build above
+    sender.addRow(this.formGroup);
+  }
+
+  public removeHandler({
+    dataItem,
+    sender,
+    rowIndex,
+  }: {
+    dataItem: any;
+    sender: any;
+    rowIndex: any;
+  }) {
     this.apollo
       .mutate({
         mutation: DELETE,
         variables: {
-          studentId: id.dataItem.id,
+          studentId: dataItem.id,
         },
       })
-      .subscribe(() => {
-        this.items = this.items.filter((i) => i.id !== id.dataItem.id);
+      .subscribe((value) => {
+        this.fetchData();
       });
-  }
 
-  public submitForm(): void {
-    this.apollo
-      .mutate({
-        mutation: CREATE_STUDENT,
-        variables: {
-          name: this.form.value.name,
-          email: this.form.value.email,
-          dateofbirth: this.form.value.dateofbirth,
-        },
-      })
-      .subscribe();
-    this.close();
-  }
+    this.fetchData();
 
-  public clearForm(): void {
-    this.form.reset();
+    sender.closeRow(rowIndex);
   }
 }

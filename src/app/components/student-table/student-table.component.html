@@ -1,16 +1,11 @@
 <div style="height: 100%">
-  <h1
-    
-  >
-    STUDENT MANAGEMENT
-  </h1>
-  <div class="header">
-    <!-- <button class="k-button add" *ngIf="!opened" (click)="open()">
+  <h1>STUDENT MANAGEMENT</h1>
+
+  <!-- <button class="k-button add" *ngIf="!opened" (click)="open()">
       Add Student
     </button> -->
-    <kendo-upload [saveUrl]="uploadSaveUrl" [removeUrl]="uploadRemoveUrl">
-    </kendo-upload>
-  </div>
+  <kendo-upload [saveUrl]="uploadSaveUrl" [removeUrl]="uploadRemoveUrl">
+  </kendo-upload>
 
   <kendo-grid
     [data]="items"
@@ -18,78 +13,33 @@
     [skip]="skip"
     [pageable]="true"
     [resizable]="true"
-    (pageChange)="pageChange($event)"
     [height]="450"
+    (edit)="editHandler($event)"
+    (save)="saveHandler($event)"
+    (add)="addHandler($event)"
+    (cancel)="cancelHandler($event)"
     (remove)="removeHandler($event)"
   >
-    <kendo-grid-column field="name" title="name"> </kendo-grid-column>
-    <kendo-grid-column field="email" title="email"> </kendo-grid-column>
-    <kendo-grid-column field="age" title="age"> </kendo-grid-column>
-    <kendo-grid-column field="dob" title="dob"> </kendo-grid-column>
-    <kendo-grid-column>
-      <ng-template kendoGridCellTemplate let-rowIndex="rowIndex">
-        <button class="k-button update" *ngIf="!opened" (click)="open()">
-          Update
-        </button>
-        <button class="k-button delete" kendoGridRemoveCommand>Delete</button>
-        <kendo-dialog
-          title="Please confirm"
-          *ngIf="opened"
-          (close)="close()"
-          [minWidth]="250"
-          [width]="450"
-        >
-          <form class="k-form" [formGroup]="form">
-            <kendo-formfield showErrors="initial">
-              <kendo-label [for]="name" text="name"></kendo-label>
-              <kendo-textbox
-                formControlName="name"
-                placeholder="name"
-                [clearButton]="true"
-                #name
-                required
-              ></kendo-textbox>
-              <kendo-formerror>Error:Name is required</kendo-formerror>
-            </kendo-formfield>
-            <kendo-formfield showErrors="initial">
-              <kendo-label [for]="email" text="email"></kendo-label>
-              <kendo-textbox
-                formControlName="email"
-                [clearButton]="true"
-                placeholder="example@gmail.com"
-                #email
-                required
-              ></kendo-textbox>
-              <kendo-formerror>Error: email is required</kendo-formerror>
-            </kendo-formfield>
-            <kendo-formfield showErrors="initial">
-              <kendo-label [for]="dateofbirth" text="dateofbirth"></kendo-label>
-              <kendo-datepicker
-                formControlName="dateofbirth"
-                format="yyyy MMMM dd"
-                placeholder="YYYY-MM-DD"
-                #dateofbirth
-                required
-              ></kendo-datepicker>
+    <ng-template kendoGridToolbarTemplate>
+      <button kendoGridAddCommand>Add new</button>
+    </ng-template>
+    <kendo-grid-column field="name" title="Name"> </kendo-grid-column>
+    <kendo-grid-column field="email" title="Email"> </kendo-grid-column>
+    <kendo-grid-column field="age" title="Age"> </kendo-grid-column>
+    <kendo-grid-column field="dob" title="DOB"> </kendo-grid-column>
+    <kendo-grid-column field="id" title="id" [hidden]="true"> </kendo-grid-column>
 
-              <kendo-formerror
-                >Error: Date Of Birth is required</kendo-formerror
-              >
-            </kendo-formfield>
-            <kendo-dialog-actions class="k-form-buttons">
-              <button kendoButton k-button (click)="clearForm()">Clear</button>
-              <button
-                kendoButton
-                k-button
-                (click)="submitForm()"
-                [primary]="true"
-              >
-                Submit
-              </button>
-            </kendo-dialog-actions>
-          </form>
-        </kendo-dialog>
-      </ng-template>
-    </kendo-grid-column>
+    <kendo-grid-command-column title="command" >
+    <ng-template kendoGridCellTemplate let-isNew="isNew">
+        <!-- edit command directive, will be visible when not in edit mode -->
+        <button kendoGridEditCommand [primary]="true">Edit</button>
+        <!-- remove command directive, will be visible when not in edit mode -->
+        <button kendoGridRemoveCommand>Remove</button>
+        <!-- save command directive, will be visible when in edit mode -->
+        <button kendoGridSaveCommand>{{ isNew ? 'Add' : 'Update' }}</button>
+        <!-- cancel command directive, will be visible when in edit mode -->
+        <button kendoGridCancelCommand>{{ isNew ? 'Discard changes' : 'Cancel' }}</button>
+    </ng-template>
+    </kendo-grid-command-column>
   </kendo-grid>
 </div>
