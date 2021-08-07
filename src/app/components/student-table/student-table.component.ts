@@ -3,6 +3,9 @@ import { Apollo, gql } from 'apollo-angular';
 import { GridDataResult, PageChangeEvent } from '@progress/kendo-angular-grid';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Student } from 'src/app/Student';
+import { NotificationService } from '@progress/kendo-angular-notification';
+
+
 const GET_STUDENTS = gql`
   query {
     student {
@@ -58,7 +61,10 @@ export class StudentTableComponent implements OnInit {
 
   public formGroup!: FormGroup;
 
-  constructor(private apollo: Apollo) {}
+  constructor(
+    private apollo: Apollo,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.fetchData();
@@ -69,8 +75,9 @@ export class StudentTableComponent implements OnInit {
     this.apollo
       .watchQuery<any>({
         query: GET_STUDENTS,
+        fetchPolicy:'network-only'
       })
-      .valueChanges.subscribe(({ data, loading }) => {
+      .valueChanges.subscribe(({ data }) => {
         this.items = data.student;
       });
   }
@@ -105,7 +112,7 @@ export class StudentTableComponent implements OnInit {
     sender.editRow(rowIndex, this.formGroup);
   }
 
-  public async saveHandler({
+  public saveHandler({
     sender,
     rowIndex,
     formGroup,
@@ -120,7 +127,7 @@ export class StudentTableComponent implements OnInit {
 
     if (isNew) {
       console.log('inside create');
-      await this.apollo
+      this.apollo
         .mutate({
           mutation: CREATE_STUDENT,
           variables: {
@@ -129,15 +136,15 @@ export class StudentTableComponent implements OnInit {
             dob: this.formGroup.value.dob,
           },
         })
-        .subscribe((value) => {
+        .subscribe(() => {
           this.fetchData();
         });
 
-      await this.fetchData();
+      
 
       sender.closeRow(rowIndex);
     } else {
-      await this.apollo
+      this.apollo
         .mutate({
           mutation: UPDATE_STUDENT,
           variables: {
@@ -147,13 +154,11 @@ export class StudentTableComponent implements OnInit {
             dob: this.formGroup.value.dob,
           },
         })
-        .subscribe((value) => {
-          console.log('inside subscribe', value);
+        .subscribe(() => {
           this.fetchData();
-          console.log('after subscribe');
         });
 
-      await this.fetchData();
+      
 
       sender.closeRow(rowIndex);
     }
@@ -193,12 +198,22 @@ export class StudentTableComponent implements OnInit {
           studentId: dataItem.id,
         },
       })
-      .subscribe((value) => {
+      .subscribe(() => {
+        this.DeleteNotification();
         this.fetchData();
       });
-
-    this.fetchData();
+    
 
     sender.closeRow(rowIndex);
+  }
+
+  public DeleteNotification(): void {
+    this.notificationService.show({
+      content: 'Deleted Student',
+      hideAfter: 600,
+      position: { horizontal: 'center', vertical: 'top' },
+      animation: { type: 'fade', duration: 400 },
+      type: { style: 'error', icon: true },
+    });
   }
 }
