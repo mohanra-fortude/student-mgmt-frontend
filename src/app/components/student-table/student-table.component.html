@@ -4,16 +4,16 @@
   <!-- <button class="k-button add" *ngIf="!opened" (click)="open()">
       Add Student
     </button> -->
-  <kendo-upload [saveUrl]="uploadSaveUrl" [removeUrl]="uploadRemoveUrl">
-  </kendo-upload>
+  <kendo-upload (upload)="onUpload($event)"> </kendo-upload>
 
   <kendo-grid
-    [data]="items"
+    [data]="gridView"
+    [resizable]="true"
+    [height]="450"
     [pageSize]="pageSize"
     [skip]="skip"
     [pageable]="true"
-    [resizable]="true"
-    [height]="450"
+     (pageChange)="pageChange($event)"
     (edit)="editHandler($event)"
     (save)="saveHandler($event)"
     (add)="addHandler($event)"
@@ -27,19 +27,21 @@
     <kendo-grid-column field="email" title="Email"> </kendo-grid-column>
     <kendo-grid-column field="age" title="Age"> </kendo-grid-column>
     <kendo-grid-column field="dob" title="DOB"> </kendo-grid-column>
-    <kendo-grid-column field="id" title="id" [hidden]="true"> </kendo-grid-column>
+    <kendo-grid-column field="id" title="id" [hidden]="true">
+    </kendo-grid-column>
 
-    <kendo-grid-command-column title="command" >
-    <ng-template kendoGridCellTemplate let-isNew="isNew">
-        <!-- edit command directive, will be visible when not in edit mode -->
+    <kendo-grid-command-column title="command">
+      <ng-template kendoGridCellTemplate let-isNew="isNew">
         <button kendoGridEditCommand [primary]="true">Edit</button>
-        <!-- remove command directive, will be visible when not in edit mode -->
+
         <button kendoGridRemoveCommand>Remove</button>
-        <!-- save command directive, will be visible when in edit mode -->
-        <button kendoGridSaveCommand>{{ isNew ? 'Add' : 'Update' }}</button>
-        <!-- cancel command directive, will be visible when in edit mode -->
-        <button kendoGridCancelCommand>{{ isNew ? 'Discard changes' : 'Cancel' }}</button>
-    </ng-template>
+
+        <button kendoGridSaveCommand>{{ isNew ? "Add" : "Update" }}</button>
+
+        <button kendoGridCancelCommand>
+          {{ isNew ? "Discard changes" : "Cancel" }}
+        </button>
+      </ng-template>
     </kendo-grid-command-column>
   </kendo-grid>
 </div>

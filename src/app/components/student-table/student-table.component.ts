@@ -4,7 +4,7 @@ import { GridDataResult, PageChangeEvent } from '@progress/kendo-angular-grid';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Student } from 'src/app/Student';
 import { NotificationService } from '@progress/kendo-angular-notification';
-
+import { request } from 'graphql-request';
 
 const GET_STUDENTS = gql`
   query {
@@ -50,16 +50,14 @@ const UPDATE_STUDENT = gql`
   styleUrls: ['./student-table.component.css'],
 })
 export class StudentTableComponent implements OnInit {
+  items: Student[] = [];
+  public file = '';
+  public formGroup!: FormGroup;
   public pageSize = 10;
   public skip = 0;
-  public opened = false;
-  items: Student[] = [];
-  form!: FormGroup;
-
-  public uploadRemoveUrl = 'removeUrl';
-  public uploadSaveUrl = 'saveUrl';
-
-  public formGroup!: FormGroup;
+  public gridView!: GridDataResult;
+  // public uploadRemoveUrl = 'http://localhost:3003/graphql';
+  // public uploadSaveUrl = 'http://localhost:3003/graphql';
 
   constructor(
     private apollo: Apollo,
@@ -70,24 +68,33 @@ export class StudentTableComponent implements OnInit {
     this.fetchData();
   }
 
+  public pageChange({ skip, take }: PageChangeEvent): void {
+    this.skip = skip;
+    this.pageSize = take;
+    this.loadItems();
+  }
+
+  public loadItems(): void {
+    this.gridView = {
+      data: this.items.slice(this.skip, this.skip + this.pageSize),
+      total: this.items.length,
+    };
+  }
+
   fetchData() {
     console.log('running fetch');
+
     this.apollo
       .watchQuery<any>({
         query: GET_STUDENTS,
-        fetchPolicy:'network-only'
+        fetchPolicy: 'network-only',
       })
       .valueChanges.subscribe(({ data }) => {
         this.items = data.student;
+        this.loadItems();
       });
-  }
-
-  public close() {
-    this.opened = false;
-  }
-
-  public open() {
-    this.opened = true;
+    
+    
   }
 
   public editHandler({
@@ -140,8 +147,6 @@ export class StudentTableComponent implements OnInit {
           this.fetchData();
         });
 
-      
-
       sender.closeRow(rowIndex);
     } else {
       this.apollo
@@ -157,8 +162,6 @@ export class StudentTableComponent implements OnInit {
         .subscribe(() => {
           this.fetchData();
         });
-
-      
 
       sender.closeRow(rowIndex);
     }
@@ -202,7 +205,6 @@ export class StudentTableComponent implements OnInit {
         this.DeleteNotification();
         this.fetchData();
       });
-    
 
     sender.closeRow(rowIndex);
   }
@@ -215,5 +217,42 @@ export class StudentTableComponent implements OnInit {
       animation: { type: 'fade', duration: 400 },
       type: { style: 'error', icon: true },
     });
+  }
+
+  public onUpload(event: any) {
+    var xhr = event.XMLHttpRequest;
+    const file = event.files[0].rawFile;
+    console.log(event, xhr);
+
+    const uploadFileMutation = gql`
+      mutation uploadFile($file: Upload!) {
+        uploadFile(file: $file)
+      }
+    `;
+
+    return request('http://localhost:3003/graphql', uploadFileMutation, {
+      file: file,
+    }).then((data) => {
+      this.fetchData();
+      return data;
+    });
+
+    // let isSuccess: boolean = false;
+
+    // this.apollo
+    //   .use('projectspec')
+    //   .mutate<any>({
+    //     mutation: uploadFileMutation,
+    //     variables: {
+    //       file: file,
+    //     },
+    //     context: {
+    //       useMultipart: true,
+    //     },
+    //   })
+    //   .subscribe(
+    //     (result) => this.fetchData(),
+    //     (err) => !isSuccess
+    //   );
   }
 }
