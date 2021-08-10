@@ -7,25 +7,15 @@ import {
 } from '@apollo/client/core';
 import { HttpLink } from 'apollo-angular/http';
 
-const uri1 = `http://localhost:3000/graphql`;
-const uri2 = 'http://localhost:3003/graphql';
-// <-- add the URL of the GraphQL server here
+const uri = `http://localhost:3000/graphql`;
 export function createApollo(httpLink: HttpLink): ApolloClientOptions<any> {
   return {
-    link: httpLink.create({ uri: uri1 }),
+    link: httpLink.create({ uri: uri }),
     cache: new InMemoryCache(),
   };
 }
 
-export function createProjectspecApollo(
-  httpLink: HttpLink
-): ApolloClientOptions<any> {
-  return {
-    name: 'projectspec',
-    link: httpLink.create({ uri: uri2 }),
-    cache: new InMemoryCache(),
-  };
-}
+
 
 @NgModule({
   providers: [
@@ -34,11 +24,6 @@ export function createProjectspecApollo(
       useFactory: createApollo,
       deps: [HttpLink],
     },
-    // {
-    //   provide: APOLLO_NAMED_OPTIONS,
-    //   useFactory: createProjectspecApollo,
-    //   deps: [HttpLink],
-    // },
   ],
 })
 export class GraphQLModule {}

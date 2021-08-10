@@ -17,6 +17,13 @@
       href="https://cdn.jsdelivr.net/npm/@progress/kendo-theme-default@dev/dist/all.css"
       crossorigin="anonymous"
     />
+    <script>
+      if (global === undefined) {
+        var global = window;
+      }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socketcluster-client/16.0.1/socketcluster-client.min.js" integrity="sha512-lgy4aLz8DeKeA4TgH9ZLYaC6fEA++0BhNNzqIWFSk1QMzbfyID+WxwW6N3BiD04ynPU7uIWpSe8lzeQlnPhjng==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
   </head>
   <body>
     <app-root></app-root>
