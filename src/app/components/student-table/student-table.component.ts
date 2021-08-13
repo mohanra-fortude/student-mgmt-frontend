@@ -7,13 +7,12 @@ import { NotificationService } from '@progress/kendo-angular-notification';
 import { StudentService } from 'src/app/services/student.service';
 
 import * as SC from 'socketcluster-client';
+import { environment } from 'src/environments/environment';
 
 let socket = SC.create({
   hostname: 'localhost',
-  port: 8000,
+  port: environment.socketPort,
 });
-
-
 
 
 @Component({
@@ -37,7 +36,6 @@ export class StudentTableComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchData();
-    
   }
 
   public pageChange({ skip, take }: PageChangeEvent): void {
@@ -190,13 +188,16 @@ export class StudentTableComponent implements OnInit {
       this.fetchData();
     });
 
+    console.log('before notif');
+
     (async () => {
       let channel = socket.subscribe('myChannel');
       for await (let data of channel) {
+        console.log(data)
         if (data) {
           this.notificationService.show({
             content: `Uploaded entry, ${data}`,
-            hideAfter: 2400,
+            hideAfter: 6000,
             position: { horizontal: 'center', vertical: 'top' },
             animation: { type: 'fade', duration: 400 },
             type: { style: 'success', icon: true },

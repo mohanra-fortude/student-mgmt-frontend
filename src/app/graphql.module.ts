@@ -6,16 +6,15 @@ import {
   ApolloLink,
 } from '@apollo/client/core';
 import { HttpLink } from 'apollo-angular/http';
+import { environment } from '../environments/environment';
 
-const uri = `http://localhost:3000/graphql`;
+const uri = environment.graphqlUrl;
 export function createApollo(httpLink: HttpLink): ApolloClientOptions<any> {
   return {
     link: httpLink.create({ uri: uri }),
     cache: new InMemoryCache(),
   };
 }
-
-
 
 @NgModule({
   providers: [

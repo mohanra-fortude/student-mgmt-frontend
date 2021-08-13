@@ -21,6 +21,7 @@ import {  HTTP_INTERCEPTORS } from '@angular/common/http';
 import { UploadInterceptor } from './app.component';
 import { DateInputsModule } from '@progress/kendo-angular-dateinputs';
 import { NotificationModule } from '@progress/kendo-angular-notification';
+import { NotificationService } from '@progress/kendo-angular-notification';
 
 
 @NgModule({
@@ -47,6 +48,7 @@ import { NotificationModule } from '@progress/kendo-angular-notification';
     NotificationModule,
   ],
   providers: [
+    NotificationService,
     {
       provide: HTTP_INTERCEPTORS,
       useClass: UploadInterceptor,

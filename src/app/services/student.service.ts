@@ -80,7 +80,7 @@ export class StudentService {
   }
 
   uploadFile(file:any) {
-  return request('http://localhost:3003/graphql', UPLOADFILE, {
+  return request('http://localhost:3001/graphql', UPLOADFILE, {
       file: file,
     })
 }
