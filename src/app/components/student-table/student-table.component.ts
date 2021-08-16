@@ -106,7 +106,6 @@ export class StudentTableComponent implements OnInit {
     console.log(isNew);
 
     if (isNew) {
-      console.log('inside create');
       const query = this.studentService.createStudent(
         this.formGroup.value.name,
         this.formGroup.value.email,
@@ -185,10 +184,11 @@ export class StudentTableComponent implements OnInit {
     const query = this.studentService.uploadFile(file);
 
     query.then(() => {
-      this.fetchData();
+      setTimeout(() => {
+        this.fetchData();
+     }, 500);
     });
 
-    console.log('before notif');
 
     (async () => {
       let channel = socket.subscribe('myChannel');
@@ -200,7 +200,10 @@ export class StudentTableComponent implements OnInit {
             hideAfter: 6000,
             position: { horizontal: 'center', vertical: 'top' },
             animation: { type: 'fade', duration: 400 },
-            type: { style: 'success', icon: true },
+            type:
+              data === 'Success'
+                ? { style: 'success', icon: true }
+                : { style: 'warning', icon: true },
           });
         }
       }
