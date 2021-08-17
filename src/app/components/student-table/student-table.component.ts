@@ -8,12 +8,12 @@ import { StudentService } from 'src/app/services/student.service';
 
 import * as SC from 'socketcluster-client';
 import { environment } from 'src/environments/environment';
+import { Subject } from 'rxjs';
 
 let socket = SC.create({
   hostname: 'localhost',
   port: environment.socketPort,
 });
-
 
 @Component({
   selector: 'app-student-table',
@@ -32,7 +32,9 @@ export class StudentTableComponent implements OnInit {
     private apollo: Apollo,
     private notificationService: NotificationService,
     private studentService: StudentService
-  ) {}
+  ) {
+    
+  }
 
   ngOnInit(): void {
     this.fetchData();
@@ -103,8 +105,6 @@ export class StudentTableComponent implements OnInit {
     formGroup: any;
     isNew: any;
   }) {
-    console.log(isNew);
-
     if (isNew) {
       const query = this.studentService.createStudent(
         this.formGroup.value.name,
@@ -157,6 +157,11 @@ export class StudentTableComponent implements OnInit {
     sender: any;
     rowIndex: any;
   }) {
+
+    if (!confirm('Are you sure you want to DELETE this student?')) {
+      return;
+    }
+
     const query = this.studentService.deleteStudent(dataItem.id);
 
     query.subscribe(() => {
@@ -177,6 +182,8 @@ export class StudentTableComponent implements OnInit {
     });
   }
 
+  
+
   public onUpload(event: any) {
     event.preventDefault();
     const file = event.files[0].rawFile;
@@ -186,14 +193,12 @@ export class StudentTableComponent implements OnInit {
     query.then(() => {
       setTimeout(() => {
         this.fetchData();
-     }, 500);
+      }, 500);
     });
-
 
     (async () => {
       let channel = socket.subscribe('myChannel');
       for await (let data of channel) {
-        console.log(data)
         if (data) {
           this.notificationService.show({
             content: `Uploaded entry, ${data}`,

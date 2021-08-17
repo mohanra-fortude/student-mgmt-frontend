@@ -65,14 +65,8 @@ describe('StudentTableComponent', () => {
         email: 'student1@123',
         dob: '2000-04-12',
       },
-      {
-        id: 2,
-        name: 'student2',
-        email: 'student2@123',
-        dob: '2000-04-12',
-      },
     ];
-    mockObject = jasmine.createSpyObj(['removeHandler', ['saveHandler']]);
+    
   });
 
   it('should create', () => {
