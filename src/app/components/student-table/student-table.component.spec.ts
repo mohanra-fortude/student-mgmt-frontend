@@ -17,7 +17,6 @@ import {
 import { UploadsModule } from '@progress/kendo-angular-upload';
 import { Apollo } from 'apollo-angular';
 import { GraphQLModule } from '../../graphql.module';
-import { of } from 'rxjs';
 import { StudentTableComponent } from './student-table.component';
 
 describe('StudentTableComponent', () => {
